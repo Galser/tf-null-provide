@@ -15,7 +15,8 @@ Null provider has 2 parts - *resource* and *data source*
 
 The **null_resource** resource implements the standard resource lifecycle but takes no further action.
 
-The **triggers** argument allows specifying an arbitrary set of values that, when changed, will cause the resource to be replaced.
+The **triggers** argument allows specifying an arbitrary set of values that, when changed, will cause the resource to be replaced (think of IPs of cluster components, for example)
+And one attribute is exported - **id** - An arbitrary value that changes each time the resource is replaced. Can be used to cause other resources to be updated or replaced in response to null_resource changes.
 
 - Create file [main1.tf](main1.tf) with the following content
     ```terraform
