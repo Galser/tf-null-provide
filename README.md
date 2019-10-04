@@ -41,7 +41,7 @@ The **triggers** argument allows specifying an arbitrary set of values that, whe
     }
 
     resource "null_resource" "example" {
-    # Changes to any instance privae IP will trigger below
+    # Changes to any instance tga "name" wil trigger this "
         triggers = {
             example_instance_ids = "${join(",", [aws_instance.example1.tags.name, aws_instance.example2.tags.name])}"
         }
@@ -51,11 +51,12 @@ The **triggers** argument allows specifying an arbitrary set of values that, whe
         }
     }
     ```
+    The most important part here is attribute **triggers** - is it optional and presents map of arbitrary strings that, when changed, will force the null resource to be replaced, re-running any associated provisioners - and that can be very usefull.
 - Init Terraform with : 
     ```
     terraform init
     ```
-- Now, let's run apply this file :
+- Now, let's run apply for our code :
     ```
     terraform.apply
     ```
@@ -68,8 +69,7 @@ The **triggers** argument allows specifying an arbitrary set of values that, whe
 
     Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
     ```
-- By itself is not very useful, but let's assume that some changes required to tags. this is going to demo the null_resource trigger. To demo it, we need to change 
-`name` tag for second instance to  `"example_two"` :
+- By itself is not very useful, but let's assume that some changes required to tags, this is going to demo the null_resource trigger. To do it, we need to change `name` tag for second instance to  `"example_two"` :
     ```terraform
     ...
     resource "aws_instance" "example2" {
@@ -114,7 +114,7 @@ The **triggers** argument allows specifying an arbitrary set of values that, whe
     null_resource.example (local-exec): Name tag in one of two instances had changed.
     null_resource.example: Creation complete after 0s [id=1939029593196223676]
     ```
-    Here we can clearly observe the message : *"Name tag in one of two instances had changed."*
+    Here we can clearly observe the message : *"Name tag in one of two instances had changed."*, and instead of simple echo it can be some provisioner.
 - Do not forget ro destroy instances after experiments ,by running :
     ```
     terraform destroy
