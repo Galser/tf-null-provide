@@ -185,7 +185,7 @@ Now, to tests.
     all_instances_ips = 172.31.36.68,172.31.42.223
     all_instances_tags = example1,example2
     ```    
-    And here, two outputs **all_instances_ips** and **all_instances_tags** are taken  from  our new data source. For example, we cna use this data source and feed it to some load-balancer.
+    And here, two outputs **all_instances_ips** and **all_instances_tags** are taken  from  our new data source. For example, we can use this data source and feed it to some load-balancer.
 
 - Please destroy the existing infrastructure, as we going to test another example. Execute :
     ```
