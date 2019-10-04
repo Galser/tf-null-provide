@@ -121,14 +121,135 @@ One attribute is exported - **id** - an arbitrary value that changes each time t
     ```
     terraform destroy
     ```
+    And replying `yes` to the question
 > Please note that code above is not the example of the good style, as most values are hard-coded, but that's intentional - to make it more readable and clear for null_provider example explanation.
+
+## Null provider : data source
+
+The **null_data_source** data source implements the standard data source lifecycle but does not interact with any external APIs.
+When distinguishing from data resources, the primary kind of resource (as declared by a resource block) is known as a managed resource. Both kinds of resources take arguments and export attributes for use in configuration, but while managed resources cause Terraform to create, update, and delete infrastructure objects, data resources cause Terraform only to read objects. For brevity, managed resources are often referred to just as "resources" when the meaning is clear from context.
+
+The following arguments are supported:
+
+  **inputs** - (Optional) A map of arbitrary strings that is copied into the outputs attribute, and accessible directly for interpolation.
+
+  **has_computed_default** - (Optional) If set, its literal value will be stored and returned. If not, its value defaults to "default". This argument exists primarily for testing and has little practical use.
+
+This data soruce also exports the following attributes :
+
+  **outputs** - After the data source is "read", a copy of the inputs map.
+
+  **random** - A random value. This is primarily for testing and has little practical use; prefer the random provider for more practical random number use-cases.
+
+Now, to tests.
+### Example 1
+
+- Let's reuse the file `main.tf` from previous section that we have already. Delete the last part with resource **"null_resource"** description and instead add **null_data_source**, as follows : 
+    ```terraform
+    data "null_data_source" "all_example_servers" {
+        inputs = {
+            all_name_tags =  "${join(",", [aws_instance.example1.tags.name, aws_instance.example2.tags.name])}"
+            all_private_ips = "${join(",", [aws_instance.example1.private_ip, aws_instance.example2.private_ip])}"
+        }
+    }
+
+    output "all_instances_tags" {
+    value = "${data.null_data_source.all_example_servers.outputs["all_name_tags"]}"
+    }
+
+    output "all_instances_ips" {
+    value = "${data.null_data_source.all_example_servers.outputs["all_private_ips"]}"
+    }
+    ```
+- Let's apply our new configuration. Run :
+    ```
+    terraform apply
+    ```
+    Output should end with : 
+    ```
+    aws_instance.example1: Creating...
+    aws_instance.example2: Creating...
+    aws_instance.example1: Still creating... [10s elapsed]
+    aws_instance.example2: Still creating... [10s elapsed]
+    aws_instance.example1: Still creating... [20s elapsed]
+    aws_instance.example2: Still creating... [20s elapsed]
+    aws_instance.example1: Creation complete after 22s [id=i-03e10aecdae8845a5]
+    aws_instance.example2: Still creating... [30s elapsed]
+    aws_instance.example2: Creation complete after 32s [id=i-0b5dc6db9209d05c6]
+    data.null_data_source.all_example_servers: Refreshing state...
+
+    Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+
+    Outputs:
+
+    all_instances_ips = 172.31.36.68,172.31.42.223
+    all_instances_tags = example1,example2
+    ```    
+    And here, two outputs **all_instances_ips** and **all_instances_tags** are taken  from  our new data source. For example, we cna use this data source and feed it to some load-balancer.
+
+- Please destroy the existing infrastructure, as we going to test another example. Execute :
+    ```
+    terraform destroy
+    ```
+    And replying `yes` to the question
+    
+
+### Example 2
+- Let's create file *main.tf* with following content :
+    ```terraform
+    variable "departments_map" {
+    type = "map"
+    default = {
+        "11" = "CorpIT"
+        "03" = "Finnace"
+        "911" = "Security"
+    }  
+    }
+
+    variable "department" { 
+        default = "11" 
+    }
+
+
+    data "null_data_source" "full_token" {
+        inputs = {
+            name = "${var.company["name"]}"
+            tax_id    = "${var.company["tax_id"]}"
+            department = var.departments_map[var.department]
+        }
+    }
+
+    output "full_token_data" {
+        value = "${data.null_data_source.full_token.inputs}"
+    }
+    ```
+- Now, let's run apply for our code :
+    ```
+    terraform.apply
+    ```
+- Output going to end up with something similar to : 
+    ```
+    data.null_data_source.full_token: Refreshing state...
+
+    Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+    Outputs:
+
+    full_token_data = {
+      "department" = "CorpIT"
+      "name" = "GRRipper"
+      "tax_id" = "18121245"
+    }
+    ```
+    And as you can see, there is a message on top : *"data.null_data_source.full_token: Refreshing state..."* - very simple for our case indeed, but very useful to gather together collections of intermediate values to re-use elsewhere later, in configuration. Like in the example above - now we have full token data with all fields (and some of them interpolated from a map) in one place, accessible via one data source. 
+
+
 
 # todo
 
-- [ ] make and test example for null provider **data source**
 
 # done
 
 - [x] create an intro
 - [x] make and test example for null provider **resource**
-
+- [x] make and test example for null provider **data source**

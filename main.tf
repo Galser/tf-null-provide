@@ -1,3 +1,4 @@
+# Null provider
 provider "aws" {
   profile    = "default"
   region     = "eu-central-1"
@@ -19,14 +20,17 @@ resource "aws_instance" "example2" {
   }  
 }
 
-resource "null_resource" "example" {
-  # Changes to name tag of any instance goign to triggr local echo
-  triggers = {
-    example_instance_ids = "${join(",", [aws_instance.example1.tags.name, aws_instance.example2.tags.name])}"
-  }
-
-  provisioner "local-exec" {
-    command = "echo Name tag in one of two instances had changed."
-  }
+data "null_data_source" "all_example_servers" {
+    inputs = {
+        all_name_tags =  "${join(",", [aws_instance.example1.tags.name, aws_instance.example2.tags.name])}"
+        all_private_ips = "${join(",", [aws_instance.example1.private_ip, aws_instance.example2.private_ip])}"
+    }
 }
 
+output "all_instances_tags" {
+  value = "${data.null_data_source.all_example_servers.outputs["all_name_tags"]}"
+}
+
+output "all_instances_ips" {
+  value = "${data.null_data_source.all_example_servers.outputs["all_private_ips"]}"
+}
