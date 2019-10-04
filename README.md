@@ -36,7 +36,7 @@ The **triggers** argument allows specifying an arbitrary set of values that, whe
         ami           = "ami-048d25c1bda4feda7" # Ubuntu 18.04.3 Bionic, custom
         instance_type = "t2.micro"
         tags = {
-            "name" = "example1"
+            "name" = "example2"
         }
     }
 
@@ -52,9 +52,9 @@ The **triggers** argument allows specifying an arbitrary set of values that, whe
     }
     ```
 - Init Terraform with : 
-```
-terraform init
-```
+    ```
+    terraform init
+    ```
 - Now, let's run apply this file :
     ```
     terraform.apply
@@ -70,17 +70,17 @@ terraform init
     ```
 - By itself is not very useful, but let's assume that some changes required to tags. this is going to demo the null_resource trigger. To demo it, we need to change 
 `name` tag for second instance to  `"example_two"` :
-  ```terraform
-  ...
-  resource "aws_instance" "example2" {
-  ami           = "ami-048d25c1bda4feda7" # Ubuntu 18.04.3 Bionic, custom
-  instance_type = "t2.micro"
-  tags = {
+    ```terraform
+    ...
+    resource "aws_instance" "example2" {
+    ami           = "ami-048d25c1bda4feda7" # Ubuntu 18.04.3 Bionic, custom
+    instance_type = "t2.micro"
+    tags = {
       "name" = "example_two"
-   }  
-  }
-  ...
-  ```
+    }  
+    }
+    ...
+    ```
 - And run apply :
     ```
     terraform.apply
@@ -119,7 +119,7 @@ terraform init
     ```
     terraform destroy
     ```
-
+> Please note that code above is not the example of the good style, as most values are hard-coded, but that's intentional - to make it more readable and clear for null_provider example explanation.
 
 # todo
 
